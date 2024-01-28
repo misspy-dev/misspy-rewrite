@@ -6,7 +6,7 @@ Fast, asynchronous misskey API framework.
 - Fast
 
 ### Tested Software
-- Misskey v13 onward
+- Misskey 2023.12.0 onward
 
 ### example
 An example can be found in [example directory](/example).
