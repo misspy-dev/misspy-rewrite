@@ -24,14 +24,14 @@ class AsyncHttpHandler:
             header = self.header
         if self.i is not None:
             data["i"] = self.i
-        if not file is None:
+        if file is not None:
             resp = await self.session.post("http" + self.urlfmt + self.address + "/api/" + endpoint, data=data)
         else:
             resp = await self.session.post("http" + self.urlfmt + self.address + "/api/" + endpoint, data=data, headers=header)
         if not resp.status_code == 200:
             try:
                 raise MisskeyAPIError(await resp.json())
-            except:
+            except:  # noqa: E722
                 raise MisskeyAPIError(await resp.text())
         return await resp.json()
 
@@ -51,7 +51,7 @@ class HttpHandler:
             header = self.header
         if self.i is not None:
             data["i"] = self.i
-        if not file is None:
+        if file is not None:
             resp = self.session.post("http" + self.urlfmt + self.address + "/api/" + endpoint, data=data)
         else:
             resp = self.session.post("http" + self.urlfmt + self.address + "/api/" + endpoint, data=data, headers=header)
