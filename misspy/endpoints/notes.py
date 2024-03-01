@@ -4,11 +4,12 @@ from ..__init__ import visibility
 from ..core.http import AsyncHttpHandler
 from ..core.types.note import Note
 from ..core.types.poll import Poll
-
+from ..core.exception import NotFound
 
 class notes:
-    def __init__(self, address, i, ssl) -> None:
+    def __init__(self, address, i, ssl, endpoints) -> None:
         self.http = AsyncHttpHandler(address, i, ssl)
+        self.endpoints = endpoints
 
     async def create(
         self,
@@ -46,6 +47,9 @@ class notes:
         Returns:
             Note: created Post.
         """
+        endpoint = "notes/create"
+        if endpoint not in self.endpoints:
+            raise NotFound('endpoint "notes/create" is not found.')
         data = {
             "text": text,
             "visibility": visibility,
@@ -59,6 +63,26 @@ class notes:
             "replyId": replyId,
             "renoteId": renoteId,
             "channelId": channelId,
-            "poll": poll
+            "poll": poll,
         }
-        return Note(**await self.http.send("notes/create", data=data))
+        return Note(**await self.http.send(endpoint, data=data))
+
+    async def delete(
+        self,
+        noteId: str
+    ) -> bool:
+        """delete post.
+
+        Args:
+            noteId (str): Post id.
+
+        Returns:
+            bool: Hi
+        """
+        endpoint = "notes/delete"
+        if endpoint not in self.endpoints:
+            raise NotFound('endpoint "notes/delete" is not found.')
+        data = {
+            "noteId": noteId
+        }
+        return await self.http.send(endpoint, data=data)

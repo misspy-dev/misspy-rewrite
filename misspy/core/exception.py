@@ -18,3 +18,6 @@ class AlreadyRegisted(RegistedError):
 
 class NotRegisted(RegistedError):
     pass
+
+class NotFound(MisskeyAPIError):
+    pass
