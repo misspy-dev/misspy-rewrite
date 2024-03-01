@@ -8,7 +8,6 @@ Fast, asynchronous misskey API framework.
 
 ### Tested Software
 - Misskey v13 onward
-- 
 
 ### example
 An example can be found in [example directory](/example).
