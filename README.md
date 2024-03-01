@@ -4,7 +4,7 @@
 
 Fast, asynchronous misskey API framework.
 
-### Feature✨
+### Features✨
 - asynchronous
 - Fast
 - Automatic detection of Misskey version (can also be set manually)
