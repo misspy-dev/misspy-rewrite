@@ -4,9 +4,11 @@ Fast, asynchronous misskey API framework.
 ### Feature✨
 - asynchronous
 - Fast
+- Automatic detection of Misskey version (can also be set manually)
 
 ### Tested Software
 - Misskey v13 onward
+- 
 
 ### example
 An example can be found in [example directory](/example).
