@@ -1,6 +1,3 @@
-"""
-This is the core library of misspy. Direct use is not recommended!
-"""
 from typing import Union
 
 import aiohttp
@@ -20,6 +17,20 @@ class AsyncHttpHandler:
             self.urlfmt = "s://"
 
     async def send(self, endpoint: str, data: dict, header: Union[str, None]=None, file=None) -> dict:
+        """addressで指定されたサーバーにPOSTリクエストを送信します。
+
+        Args:
+            endpoint (str): エンドポイント (例: notes/create)
+            data (dict): 送信するデータ。トークン(i)は自動的に挿入される為不要です。
+            header (Union[str, None], optional): ヘッダー。ファイルが添付されている場合は利用されません。 Defaults to None.
+            file (_type_, optional): ファイル。 Defaults to None.
+
+        Raises:
+            MisskeyAPIError: 何らかの理由でMisskeyAPIからエラーが返された場合発生します。
+
+        Returns:
+            dict: リクエスト結果
+        """
         if header is None:
             header = self.header
         if self.i is not None:
@@ -33,7 +44,10 @@ class AsyncHttpHandler:
                 raise MisskeyAPIError(await resp.json())
             except:  # noqa: E722
                 raise MisskeyAPIError(await resp.text())
-        return await resp.json()
+        try:
+            return await resp.json()
+        except:  # noqa: E722
+            return True
 
 class HttpHandler:
 
