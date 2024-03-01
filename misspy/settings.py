@@ -11,6 +11,8 @@ class Option:
 class extension:
     exts = {
         "note": [],
+        "followed": [],
+        "ready": []
     }
     extId = {}
 
