@@ -1,15 +1,10 @@
-import dataclasses
 from typing import Union
+
+from pydantic import dataclasses
 
 from .user import User, UserLite
 from .drive import DriveFile
-
-@dataclasses.dataclass
-class visibility:
-    public = "public"
-    home = "home"
-    followers = "followers"
-    specified = "specified"
+from .internal import mspy
 
 @dataclasses.dataclass
 class Note:
@@ -43,3 +38,4 @@ class Note:
     url: str
     reactionAndUserPairCache: list[str]
     myReaction: dict
+    misspy: mspy

@@ -1,5 +1,6 @@
-import dataclasses
 from typing import Union
+
+from pydantic import dataclasses
 
 from .user import User
 

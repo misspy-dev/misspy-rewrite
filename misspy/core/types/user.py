@@ -1,5 +1,6 @@
-import dataclasses
 from typing import Union
+
+from pydantic import dataclasses
 
 @dataclasses.dataclass
 class avatarDecorations:
