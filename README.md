@@ -15,7 +15,7 @@ $ pip install git+https://github.com/misspy-dev/misspy-rewrite.git
 ```
 
 ### Tested Software
-- Misskey v13 onward
+- Misskey v13 onward (Unavailable endpoints are designed to send an error, so they are available in v10 or later Misskey versions and forks.)
 
 ### example
 An example can be found in [example directory](/example).
