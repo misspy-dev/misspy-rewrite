@@ -37,9 +37,11 @@ class MSC:
     @retry(wait=wait_random(min=1, max=5))
     async def start(self):
         async with self.session.ws_connect('ws{}{}/streaming?i={}'.format(self.urlfmt, self.address, self.i)) as self.ws:
+            await self.handler({"type": "__internal", "body": {"type": "ready"}})
+            recv = await self.ws.receive_json()
+            await self.handler(recv)
             while True:
                 try:
-                    await self.handler({"status": "connected", "data": None})
                     recv = await self.ws.receive_json()
                     await self.handler(recv)
                 except:
@@ -49,4 +51,4 @@ class MSC:
     async def connect_channel(self, channel: str, id: str=None): 
         if id is None:
             id = channel
-        await self.ws.send({"type": 'connect', "body": {"channel": channel, "id": id, "params": {}}})
+        await self.ws.send_json({"type": 'connect', "body": {"channel": channel, "id": id, "params": {}}})
