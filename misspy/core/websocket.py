@@ -1,6 +1,6 @@
 import websockets
 import orjson
-from tenacity import retry, TryAgain, wait_random
+#from tenacity import retry, TryAgain, wait_random
 
 
 class MiWS_V2:
@@ -32,19 +32,27 @@ class MiWS_V2:
         if ssl:
             self.urlfmt = "s://"
 
-    @retry(wait=wait_random(min=1, max=5))
+    #@retry(wait=wait_random(min=1, max=5))
     async def start(self):
         async with websockets.connect('ws{}{}/streaming?i={}'.format(self.urlfmt, self.address, self.i)) as self.ws:
+            await self.handler({"type": "__internal", "body": {"type": "ready"}})
+            recv = orjson.loads(await self.ws.recv())
+            await self.handler(recv)
             while True:
+                recv = orjson.loads(await self.ws.recv())
+                await self.handler(recv)
+                """
                 try:
-                    await self.handler({"status": "connected", "data": None})
                     recv = orjson.loads(await self.ws.recv())
                     await self.handler(recv)
                 except:
                     if self.reconnect:
                         raise TryAgain
+                    else:
+                        raise websockets.ConnectionClosed
+                """
 
     async def connect_channel(self, channel: str, id: str=None): 
         if id is None:
             id = channel
-        await self.ws.send({"type": 'connect', "body": {"channel": channel, "id": id, "params": {}}})
+        await self.ws.send(orjson.dumps({"type": 'connect', "body": {"channel": channel, "id": id, "params": {}}}).decode('utf-8'))
