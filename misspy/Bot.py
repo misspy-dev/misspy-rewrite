@@ -1,14 +1,18 @@
 import asyncio
+from functools import partial
 from typing import Union
 import logging
-import re
 
-from .core.http import AsyncHttpHandler
+from .core.http import AsyncHttpHandler, HttpHandler
 from .core.types.note import Note
+from .core.types.user import User
+
 from .endpoints.drive import drive
 from .endpoints.notes import notes
+
 from .settings import Option, extension
 
+# from .flags import misspy_flag
 
 class Bot:
     def __init__(
@@ -16,21 +20,29 @@ class Bot:
         address: str,
         i: Union[str, None]
     ) -> None:
-        logger = logging.getLogger("misspy")
+        # self.Flag = misspy_flag()
+        self.logger = logging.getLogger("misspy")
         self.address = address
         self.i = i
         self.ssl = Option.ssl
         self.ext = extension
-        self.http = AsyncHttpHandler(self.address, self.i, self.ssl)
+        self.http = AsyncHttpHandler(self.address, self.i, self.ssl, logger=self.logger)
+        self.http_sync = HttpHandler(self.address, self.i, self.ssl)
+        self.user: User = User(**self.__i())
 
         self.endpoint_list = self.endpoints()
+
         # ---------- endpoints ------------
-        self.notes = notes(self.address, self.i, self.ssl, endpoints=self.endpoint_list)
-        self.drive = drive(self.address, self.i, self.ssl, endpoints=self.endpoint_list)
+        self.notes = notes(self.address, self.i, self.ssl, endpoints=self.endpoint_list, handler=self.http)
+        self.drive = drive(self.address, self.i, self.ssl, endpoints=self.endpoint_list, handler=self.http)
         # ---------------------------------
 
-    async def endpoints(self):
-        return await self.http.send("endpoints", data={})
+    def __i(self):
+        return self.http_sync.send("i", data={})
+
+
+    def endpoints(self):
+        return self.http_sync.send("endpoints", data={})
 
     def run(self, reconnect=False):
         self.ws = Option.ws_engine(
@@ -44,6 +56,9 @@ class Bot:
     async def handler(self, json: dict):
         if json["type"] == "channel":
             if json["body"]["type"] == "note":
+                json["body"]["body"]["api"] = {}
+                json["body"]["body"]["api"]["reply"] = partial(self.notes.create, replyId=json["body"]["body"]["id"])
+                json["body"]["body"]["api"]["renote"] = partial(self.notes.create, renoteId=json["body"]["body"]["id"])
                 pnote = Note(**json["body"]["body"])
                 for func in extension.exts["note"]:
                     await func(pnote)

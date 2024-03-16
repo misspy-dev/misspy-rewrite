@@ -2,40 +2,41 @@ from typing import Union
 
 from pydantic import dataclasses
 
-@dataclasses.dataclass
-class avatarDecorations:
+@dataclasses.dataclass(config=dict(extra="allow"))
+class AvatarDecorations:
     id: str
     url: str
-    angle: int
-    flipH: bool
+    angle: float = None
+    flipH: bool = None
 
-@dataclasses.dataclass
+@dataclasses.dataclass(config=dict(extra="allow"))
 class User:
     id: str
     createdAt: str
     username: str
-    host: Union[str, None]
-    name: Union[str, None]
-    avatarUrl: Union[str, None]
-    avatarBlurhash: Union[str, None]
-    avatarDecorations: list[Union[avatarDecorations, None]]
-    isAdmin: bool
-    isModerator: bool
-    isBot: bool
-    isCat: bool
-    onlineStatus: Union[str, None]
+    host: Union[str, None] = None 
+    name: Union[str, None] = None 
+    avatarUrl: Union[str, None] = None 
+    avatarBlurhash: Union[str, None] = None 
+    avatarDecorations: list[Union[AvatarDecorations, None]] = None
+    isAdmin: bool = False
+    isModerator: bool = False
+    isBot: bool = False
+    isCat: bool = False
+    onlineStatus: Union[str, None] = None
 
-@dataclasses.dataclass
+@dataclasses.dataclass(config=dict(extra="allow"))
 class UserLite:
     id: str
-    name: Union[str, None]
     username: str
-    host: Union[str, None]
-    avatarUrl: Union[str, None]
-    avatarBlurhash: Union[str, None]
-    avatarDecorations: list[Union[avatarDecorations, None]]
-    isAdmin: bool
-    isModerator: bool
-    isBot: bool
-    isCat: bool
-    onlineStatus: Union[str, None]
+    name: Union[str, None] = None
+    
+    host: Union[str, None] = None
+    avatarUrl: Union[str, None] = None
+    avatarBlurhash: Union[str, None] = None
+    avatarDecorations: list[Union[AvatarDecorations, None]] = None
+    isAdmin: bool = False
+    isModerator: bool = False
+    isBot: bool = False
+    isCat: bool = False
+    onlineStatus: Union[str, None] = None

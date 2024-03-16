@@ -1,27 +1,27 @@
 from typing import Union
 
-from pydantic import dataclasses
+from pydantic import dataclasses, Field
 
 from .user import User
 
-@dataclasses.dataclass
+@dataclasses.dataclass(config=dict(extra="allow"))
 class DriveFolder:
     id: str
     createdAt: str
     name: str
     foldersCount: int
     filesCount: int
-    parentId: str
-    parent: dict
+    parentId: Union[str, None] = None
+    parent: Union[dict, None] = Field(default_factory=dict)
 
-@dataclasses.dataclass
+@dataclasses.dataclass(config=dict(extra="allow"))
 class df_property:
-    width: int
-    height: int
-    orientation: int
-    avgColor: str
+    width: Union[int, None] = None
+    height: Union[int, None] = None
+    orientation: Union[int, None] = None
+    avgColor: Union[str, None] = None
 
-@dataclasses.dataclass
+@dataclasses.dataclass(config=dict(extra="allow"))
 class DriveFile:
     id: str
     createdAt: str
@@ -29,13 +29,13 @@ class DriveFile:
     type: str
     md5: str
     size: int
-    isSensitive: bool
-    blurhash: Union[str, None]
     properties: df_property
-    url: Union[str, None]
-    thumbnailUrl: Union[str, None]
-    comment: Union[str, None]
-    folderId: Union[str, None]
-    folder: Union[DriveFolder, None]
-    userId: Union[str, None]
-    user: Union[User, None]
+    isSensitive: bool = False
+    blurhash: Union[str, None] = None
+    url: Union[str, None] = None
+    thumbnailUrl: Union[str, None] = None
+    comment: Union[str, None] = None
+    folderId: Union[str, None] = None
+    folder: Union[DriveFolder, None] = None
+    userId: Union[str, None] = None
+    user: Union[User, None] = None

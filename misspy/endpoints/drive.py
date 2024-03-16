@@ -1,21 +1,31 @@
 from typing import List, Union
 
+from ..core.exception import NotFound
 from ..core.http import AsyncHttpHandler
 from ..core.types.drive import DriveFile
-from ..core.exception import NotFound
+
 
 class drive:
-    def __init__(self, address, i, ssl, endpoints) -> None:
-        self.http = AsyncHttpHandler(address, i, ssl)
+    def __init__(
+        self,
+        address: str,
+        i: Union[str, None],
+        ssl: bool,
+        endpoints: List[str],
+        handler: AsyncHttpHandler = None,
+    ) -> None:
+        self.http = handler
+        if handler is None:
+            self.http = AsyncHttpHandler(address, i, ssl)
         self.endpoints = endpoints
 
     async def files(
         self,
-        limit: int=10,
-        sinceId: str=None,
-        untilId: str=None,
-        folderId: Union[str, None]=None,
-        type: Union[str, None]=None,
+        limit: int = 10,
+        sinceId: str = None,
+        untilId: str = None,
+        folderId: Union[str, None] = None,
+        type: Union[str, None] = None,
     ) -> List[DriveFile]:
         """Obtains a list of files in the specified folder or root hierarchy under the logged-in user's drive.
 
@@ -32,11 +42,7 @@ class drive:
         endpoint = "drive/files"
         if endpoint not in self.endpoints:
             raise NotFound('endpoint "drive/files" is not found.')
-        data = {
-            "limit": limit,
-            "folderId": folderId,
-            "type": type
-        }
+        data = {"limit": limit, "folderId": folderId, "type": type}
         if sinceId:
             data["sinceId"] = sinceId
         if untilId:
@@ -60,9 +66,7 @@ class drive:
         if endpoint not in self.endpoints:
             raise NotFound('endpoint "drive/files/create" is not found.')
         with open(path, "rb") as f:
-            return DriveFile(
-                **await self.http.send(endpoint, data={"file": f})
-            )
+            return DriveFile(**await self.http.send(endpoint, data={"file": f}))
 
     async def files_delete(self, fileId: str) -> bool:
         """delete files.
