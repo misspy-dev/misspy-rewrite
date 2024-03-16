@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "misspy"
-version = "2024.1.0"
-description = "Fast, asynchronous misskey API framework"
+version = "0.0.0"
+description = "Fast, asynchronous Misskey API framework"
 authors = ["sonyakun <owner@sonyakun.com>"]
 readme = "README.md"
 license = "MIT"
@@ -10,7 +10,7 @@ homepage = "https://rewrite.misspy.xyz/"
 repository = "https://go.misspy.xyz/rewrite"
 documentation = "https://rewrite.misspy.xyz/docs/"
 
-keywords = ["misskey", "misskey-api"]
+keywords = ["misskey", "misskey-api", "misskey-bot"]
 
 classifiers = [
     "Topic :: Software Development :: Build Tools",
@@ -20,6 +20,9 @@ classifiers = [
 packages = [
     { include = "misspy" }
 ]
+
+[tool.poetry-version-plugin]
+source = "git-tag"
 
 [tool.poetry.dependencies]
 python = "^3.8"

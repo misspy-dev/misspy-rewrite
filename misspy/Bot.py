@@ -9,6 +9,7 @@ from .core.types.user import User
 
 from .endpoints.drive import drive
 from .endpoints.notes import notes
+from .endpoints.reaction import reactions
 
 from .settings import Option, extension
 
@@ -35,6 +36,7 @@ class Bot:
         # ---------- endpoints ------------
         self.notes = notes(self.address, self.i, self.ssl, endpoints=self.endpoint_list, handler=self.http)
         self.drive = drive(self.address, self.i, self.ssl, endpoints=self.endpoint_list, handler=self.http)
+        self.reactions = reactions(self.address, self.i, self.ssl, endpoints=self.endpoint_list, handler=self.http)
         # ---------------------------------
 
     def __i(self):
@@ -57,6 +59,9 @@ class Bot:
         if json["type"] == "channel":
             if json["body"]["type"] == "note":
                 json["body"]["body"]["api"] = {}
+                json["body"]["body"]["api"]["reactions"] = {}
+                json["body"]["body"]["api"]["reactions"]["create"] = partial(self.reactions.create, noteId=json["body"]["body"]["id"])
+                json["body"]["body"]["api"]["reactions"]["delete"] = partial(self.reactions.delete, noteId=json["body"]["body"]["id"])
                 json["body"]["body"]["api"]["reply"] = partial(self.notes.create, replyId=json["body"]["body"]["id"])
                 json["body"]["body"]["api"]["renote"] = partial(self.notes.create, renoteId=json["body"]["body"]["id"])
                 pnote = Note(**json["body"]["body"])
