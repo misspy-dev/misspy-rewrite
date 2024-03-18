@@ -36,6 +36,7 @@ tenacity = "^8.2.3"
 brotlicffi = "^1.1.0.0"
 brotli = "^1.1.0"
 pydantic = "^2.6.3"
+mitypes = "^0.1.0"
 
 [tool.poetry.group.fast]
 optional = true

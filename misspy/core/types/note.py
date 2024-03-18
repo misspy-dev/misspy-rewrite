@@ -2,8 +2,8 @@ from typing import Union
 
 from pydantic import dataclasses, Field
 
-from .user import User, UserLite
-from .drive import DriveFile
+from mitypes.user import UserLite
+from mitypes.drive import DriveFile
 from .internal import mspy
 from .action import APIAction
 
@@ -41,5 +41,4 @@ class Note:
     reactionAcceptance: Union[str, None] = None
     reactionAndUserPairCache: list[str] = Field(default_factory=list)
     misspy: Union[mspy, None] = None
-
     api: Union[APIAction, None] = None
