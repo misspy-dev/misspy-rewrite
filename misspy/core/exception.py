@@ -7,9 +7,8 @@ class HTTPError(Exception):
 class MisskeyAPIError(MiError):
     pass
 
-class ClientError(MiError):
+class ClientException(MiError):
     pass
-
 
 class ParseError(Exception):
     pass

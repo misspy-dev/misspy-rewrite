@@ -1,0 +1,85 @@
+{
+    "createdNote": {
+        "id": "9qy1bty0ryal04p0",
+        "createdAt": "2024-03-16T19:18:19.224Z",
+        "userId": "9qpf3hmkbzrx087f",
+        "user": {
+            "id": "9qpf3hmkbzrx087f",
+            "name": "そにゃ@:vrc:",
+            "username": "sonyakun_vr",
+            "host": null,
+            "avatarUrl": "https://proxy.misskeyusercontent.com/avatar.webp?url=https%3A%2F%2Fmedia.misskeyusercontent.com%2Fio%2F3d0ac02b-6d09-414a-bc65-97820078ae75.webp&avatar=1",
+            "avatarBlurhash": "edH{EB?w0JNG%1xu%ho~oIt8NekCxaaej?RQM{RjoLRjM{Rjazaxay",
+            "avatarDecorations": [],
+            "isBot": false,
+            "isCat": false,
+            "emojis": {},
+            "onlineStatus": "online",
+            "badgeRoles": []
+        },
+        "text": "Hi!",
+        "cw": null,
+        "visibility": "specified",
+        "localOnly": false,
+        "reactionAcceptance": null,
+        "visibleUserIds": [
+            "9dd06by0t3"
+        ],
+        "renoteCount": 0,
+        "repliesCount": 0,
+        "reactionCount": 0,
+        "reactions": {},
+        "reactionEmojis": {},
+        "fileIds": [],
+        "files": [],
+        "replyId": "9qy1btpprwhr068t",
+        "renoteId": null,
+        "mentions": [
+            "9dd06by0t3"
+        ],
+        "clippedCount": 0,
+        "reply": {
+            "id": "9qy1btpprwhr068t",
+            "createdAt": "2024-03-16T19:18:18.925Z",
+            "userId": "9dd06by0t3",
+            "user": {
+                "id": "9dd06by0t3",
+                "name": "そにゃ@:io: :nekobounce:",
+                "username": "sonyakun",
+                "host": null,
+                "avatarUrl": "https://proxy.misskeyusercontent.com/avatar.webp?url=https%3A%2F%2Fmedia.misskeyusercontent.com%2Fio%2F6b68499f-8f67-4ccf-9b85-abef2d69f9cd.png&avatar=1",
+                "avatarBlurhash": "eLHyN=xSwG%4NaER-?WGnhiv}[nNo#NGsA4mx[R*N{J7$hI.x]$*M|",
+                "avatarDecorations": [
+                    {
+                        "id": "9mh8lazxzayu08lc",
+                        "url": "https://media.misskeyusercontent.com/io/52d82af0-d2d2-4b0e-b324-759a91d10249.png"
+                    },
+                    {
+                        "id": "9mh8lazxzayu08lc",
+                        "offsetY": -0.09999999999999998,
+                        "url": "https://media.misskeyusercontent.com/io/52d82af0-d2d2-4b0e-b324-759a91d10249.png"
+                    }
+                ],
+                "isBot": false,
+                "isCat": true,
+                "emojis": {},
+                "onlineStatus": "online",
+                "badgeRoles": []
+            },
+            "text": "ラズパイ欲しいなぁ",
+            "cw": null,
+            "visibility": "public",
+            "localOnly": false,
+            "reactionAcceptance": null,
+            "renoteCount": 0,
+            "repliesCount": 1,
+            "reactionCount": 0,
+            "reactions": {},
+            "reactionEmojis": {},
+            "fileIds": [],
+            "files": [],
+            "replyId": null,
+            "renoteId": null
+        }
+    }
+}

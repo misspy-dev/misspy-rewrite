@@ -1,12 +1,4 @@
-from .core.websocket import MiWS_V2
 from .core.exception import AlreadyRegisted, NotRegisted
-
-class Option:
-    """
-    misspy Settings. Here you can change the libraries used for WebSocket connections, etc.
-    """
-    ws_engine = MiWS_V2 # misspy.MiWS_V2 or misspy.MSC
-    ssl = True
 
 class extension:
     exts = {
