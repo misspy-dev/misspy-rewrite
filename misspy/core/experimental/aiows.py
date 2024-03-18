@@ -1,8 +1,10 @@
 """
 aiohttp Engine
 """
+import traceback
+
 import aiohttp
-from tenacity import retry, TryAgain, wait_random
+# from tenacity import retry, TryAgain, wait_random
 
 class MSC:
     """
@@ -34,7 +36,7 @@ class MSC:
         if ssl:
             self.urlfmt = "s://"
 
-    @retry(wait=wait_random(min=1, max=5))
+    # @retry(wait=wait_random(min=1, max=5))
     async def start(self):
         async with self.session.ws_connect('ws{}{}/streaming?i={}'.format(self.urlfmt, self.address, self.i)) as self.ws:
             await self.handler({"type": "__internal", "body": {"type": "ready"}})
@@ -44,9 +46,12 @@ class MSC:
                 try:
                     recv = await self.ws.receive_json()
                     await self.handler(recv)
-                except:
+                except Exception as e:
+                    await self.handler({"type": "__internal", "body": {"type": "exception", "errorType": e.__class__.__name__, "exc": traceback.format_exc(), "exc_obj": e}})
+                    """
                     if self.reconnect:
                         raise TryAgain
+                    """
 
     async def connect_channel(self, channel: str, id: str=None): 
         if id is None:

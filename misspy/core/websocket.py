@@ -1,3 +1,5 @@
+import traceback
+
 import websockets
 import orjson
 #from tenacity import retry, TryAgain, wait_random
@@ -39,8 +41,11 @@ class MiWS_V2:
             recv = orjson.loads(await self.ws.recv())
             await self.handler(recv)
             while True:
-                recv = orjson.loads(await self.ws.recv())
-                await self.handler(recv)
+                try:
+                    recv = orjson.loads(await self.ws.recv())
+                    await self.handler(recv)
+                except Exception as e:
+                    await self.handler({"type": "__internal", "body": {"type": "exception", "errorType": e.__class__.__name__, "exc": traceback.format_exc(), "exc_obj": e}})
                 """
                 try:
                     recv = orjson.loads(await self.ws.recv())

@@ -6,14 +6,16 @@ import logging
 from .core.http import AsyncHttpHandler, HttpHandler
 from .core.types.note import Note
 from .core.types.user import User
+from .core.types.internal import error
+from .core.exception import MisskeyAPIError, ClientException
 
 from .endpoints.drive import drive
 from .endpoints.notes import notes
 from .endpoints.reaction import reactions
 
-from .settings import Option, extension
+from .settings import extension
 
-# from .flags import misspy_flag
+from .flags import misspy_flag
 
 class Bot:
     def __init__(
@@ -21,15 +23,18 @@ class Bot:
         address: str,
         i: Union[str, None]
     ) -> None:
+        self.apierrors = []
         # self.Flag = misspy_flag()
         self.logger = logging.getLogger("misspy")
         self.address = address
         self.i = i
-        self.ssl = Option.ssl
+        self.flag = misspy_flag
+        self.ssl = self.flag.ssl
         self.ext = extension
         self.http = AsyncHttpHandler(self.address, self.i, self.ssl, logger=self.logger)
         self.http_sync = HttpHandler(self.address, self.i, self.ssl)
         self.user: User = User(**self.__i())
+
 
         self.endpoint_list = self.endpoints()
 
@@ -47,7 +52,7 @@ class Bot:
         return self.http_sync.send("endpoints", data={})
 
     def run(self, reconnect=False):
-        self.ws = Option.ws_engine(
+        self.ws = self.flag.engine(
             self.address, self.i, self.handler, reconnect, self.ssl
         )
         asyncio.run(self.ws.start())
@@ -74,3 +79,17 @@ class Bot:
             if json["body"]["type"] == "ready":
                 for func in extension.exts["ready"]:
                     await func()
+            elif json["body"]["type"] == "exception":
+                if not extension.exts["error"] == []:
+                    eb = {
+                        "type": json["body"]["errorType"],
+                        "exc": json["body"]["exc"],
+                        "exc_obj": json["body"]["exc_obj"]
+                    }
+                    for func in extension.exts["error"]:
+                        await func(error(**eb))
+                else:
+                    if json["body"]["errorType"] in self.apierrors:
+                        raise MisskeyAPIError(json["body"]["exc"])
+                    else:
+                        raise ClientException(json["body"]["exc"])
