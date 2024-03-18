@@ -1,6 +1,5 @@
 from typing import Any
 
-import pydantic
 from pydantic import dataclasses
 
 @dataclasses.dataclass(config=dict(extra="allow", arbitrary_types_allowed=True))

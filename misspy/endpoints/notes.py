@@ -7,8 +7,8 @@ import orjson
 from ..core.exception import NotFound
 from ..core.http import AsyncHttpHandler
 from ..core.types.note import Note
-from ..core.types.poll import Poll
-from ..core.types.drive import DriveFile
+from mitypes.poll import Poll
+from mitypes.drive import DriveFile
 from ..utils.internaltool import nonecheck
 
 class notes:
