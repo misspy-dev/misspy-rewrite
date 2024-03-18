@@ -24,3 +24,9 @@ class NotRegisted(RegistedError):
 
 class NotFound(MisskeyAPIError):
     pass
+
+class MiAuthFailed(NotFound):
+    pass
+
+class AuthFailed(MisskeyAPIError):
+    pass
