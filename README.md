@@ -13,6 +13,9 @@ Fast, asynchronous misskey API framework.
 ```
 $ pip install git+https://github.com/misspy-dev/misspy-rewrite.git
 ```
+```
+$ pip install misspy==2.0a3
+```
 
 ### Tested Software
 - Misskey v13 onward (Unavailable endpoints are designed to send an error, so they are available in v10 or later Misskey versions and forks.)
