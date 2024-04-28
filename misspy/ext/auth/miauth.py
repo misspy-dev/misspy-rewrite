@@ -3,9 +3,9 @@ from typing import Union, List
 import uuid
 
 import aiohttp
+from mitypes import User
 
 from ...core.types.internal import miauth_session
-from ...core.types.user import User
 from ...core.exception import MiAuthFailed, NotFound
 
 class session:
