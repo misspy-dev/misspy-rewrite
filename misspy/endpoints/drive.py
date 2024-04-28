@@ -1,8 +1,9 @@
 from typing import List, Union
 
+from mitypes import DriveFile
+
 from ..core.exception import NotFound
 from ..core.http import AsyncHttpHandler
-from ..core.types.drive import DriveFile
 
 
 class drive:
