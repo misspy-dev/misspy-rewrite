@@ -12,12 +12,16 @@ misspy (rewrite) is a framework for writing Misskey bots with Discord.py-like sy
 - Discord.py-like syntax
 
 ### Install
+#### Latest Develop Release
 ```
 $ pip install git+https://github.com/misspy-dev/misspy-rewrite.git
 ```
+#### Latest Alpha Release
 ```
 $ pip install misspy==2.0a4
 ```
+#### Difference between Alpha release and Develop release
+Develop releases are always installed from the latest source code, whereas Alpha releases are taken from the latest PyPI release.
 
 ### Tested Software
 - Misskey v13 onward (Unavailable endpoints are designed to send an error, so they are available in v10 or later Misskey versions and forks.)
