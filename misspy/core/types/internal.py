@@ -1,13 +1,16 @@
 from typing import Union, List
 
-from pydantic import dataclasses
+from pydantic import dataclasses, BaseModel, ConfigDict
+
+class MyModel(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 @dataclasses.dataclass(config=dict(extra="allow"))
 class mspy:
     tlId: str
 
 @dataclasses.dataclass(config=dict(extra="allow"))
-class error:
+class error(MyModel):
     type: str
     exc: str
     exc_obj: Exception
