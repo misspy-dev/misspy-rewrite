@@ -4,10 +4,12 @@
 
 Fast, asynchronous misskey API framework.
 
+misspy (rewrite) is a framework for writing Misskey bots with Discord.py-like syntax.
 ### Features✨
 - asynchronous
 - Fast
 - Automatic detection of Misskey version (can also be set manually)
+- Discord.py-like syntax
 
 ### Install
 ```
@@ -29,4 +31,4 @@ An example can be found in [example directory](/example).
 misspy currently supports all versions of Python 3.8 and later.
 
 ### Docs
-Documentation can be found at: https://rewrite.misspy.xyz/docs
+Documentation can be found at: [https://rewrite.misspy.xyz/docs](#) (Currently under preparation.)
