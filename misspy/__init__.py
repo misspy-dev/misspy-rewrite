@@ -9,8 +9,7 @@ from .Bot import Bot
 from .core import websocket
 from .core.experimental import aiows
 from .core.types import *  # noqa: F403
-from .core.types.note import Note
-from .settings import Option, extension  # noqa: F401
+from .core.types.note import Note, Context
 
 __version__ = version("misspy")
 
