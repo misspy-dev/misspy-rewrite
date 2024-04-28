@@ -1,6 +1,6 @@
 # misspy
 > [!WARNING]
-> This is in the development phase. Do not use in a production environment.
+> It is in the development phase and very many features are missing. Do not use in a production environment.
 
 Fast, asynchronous misskey API framework.
 
@@ -16,7 +16,7 @@ misspy (rewrite) is a framework for writing Misskey bots with Discord.py-like sy
 $ pip install git+https://github.com/misspy-dev/misspy-rewrite.git
 ```
 ```
-$ pip install misspy==2.0a3
+$ pip install misspy==2.0a4
 ```
 
 ### Tested Software
