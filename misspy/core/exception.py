@@ -13,16 +13,13 @@ class ClientException(MiError):
 class ParseError(Exception):
     pass
 
+class NotExtensionError(Exception):
+    pass
+
 class RegistedError(Exception):
     pass
 
 class AlreadyRegisted(RegistedError):
-    pass
-
-class NotRegisted(RegistedError):
-    pass
-
-class NotFound(MisskeyAPIError):
     pass
 
 class MiAuthFailed(NotFound):
