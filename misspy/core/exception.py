@@ -22,6 +22,9 @@ class RegistedError(Exception):
 class AlreadyRegisted(RegistedError):
     pass
 
+class NotFound(HTTPError):
+    pass
+
 class MiAuthFailed(NotFound):
     pass
 
