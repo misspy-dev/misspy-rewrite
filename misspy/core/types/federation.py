@@ -32,6 +32,7 @@ class field:
     name: str
     value: str
 
+"""
 @dataclasses.dataclass()
 class users:
     id: str
@@ -92,3 +93,4 @@ class users:
     isRenoteMuted: bool
     notify: str
     withReplies: bool
+"""
