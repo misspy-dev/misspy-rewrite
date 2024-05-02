@@ -1,6 +1,9 @@
 import asyncio
+import inspect
 import logging
+from enum import Enum
 from functools import partial
+import traceback
 
 # from importlib import import_module
 from typing import Union
@@ -10,42 +13,61 @@ from mitypes.user import User
 from .core.exception import (
     ClientException,
     MisskeyAPIError,
+#     NotExtensionError
 )
 from .core.http import AsyncHttpHandler, HttpHandler
+from .core.websocket import MiWS_V2
+
 from .core.types.internal import error
 from .core.types.note import Context
 from .endpoints.drive import drive
+from .endpoints.i import antennas, blocking, following, mute, users
+from .endpoints.i import i as ep_i
 from .endpoints.notes import notes
 from .endpoints.reaction import reactions
-from .flags import misspy_flag
+
+
+class Timeline(Enum):
+    HOMR = "homeTimeline"
+    LOCAL = "localTimeline"
+    SOCIAL = "hybridTimeline"
+    HYBRID = "hybridTimeline"
+    GLOBAL = "globalTimeline"
 
 
 class Bot:
     def __init__(self, address: str, i: Union[str, None]) -> None:
         self.apierrors = []
-        # self.Flag = misspy_flag()
         self.logger = logging.getLogger("misspy")
         self.address = address
-        self.i = i
-        self.flag = misspy_flag
-        self.ssl = self.flag.ssl
-        self.http = AsyncHttpHandler(self.address, self.i, self.ssl, logger=self.logger)
-        self.http_sync = HttpHandler(self.address, self.i, self.ssl)
+        self._i = i
+        self.engine = MiWS_V2
+        self.ssl = True
+        self.http = AsyncHttpHandler(
+            self.address, self._i, self.ssl, logger=self.logger
+        )
+        self.http_sync = HttpHandler(self.address, self._i, self.ssl)
         self.user: User = User(**self.__i())
         self.funcs: dict = {}
-
+        self.cls = []
         self.endpoint_list = self.endpoints()
         args = {
             "address": self.address,
-            "i": self.i,
+            "i": self._i,
             "ssl": self.ssl,
             "endpoints": self.endpoint_list,
             "handler": self.http,
         }
         # ---------- endpoints ------------
+        self.antennas = antennas(**args)
         self.notes = notes(**args)
         self.drive = drive(**args)
         self.reactions = reactions(**args)
+        self.i = ep_i(**args)
+        self.blocking = blocking(**args)
+        self.mute = mute(**args)
+        self.users = users(**args)
+        self.following = following(**args)
         # ---------------------------------
 
     def __i(self):
@@ -58,8 +80,8 @@ class Bot:
         asyncio.run(self.start())
 
     async def start(self, reconnect=False):
-        self.ws = self.flag.engine(
-            self.address, self.i, self.handler, reconnect, self.ssl
+        self.ws = self.engine(
+            self.address, self._i, self.handler, reconnect, self.ssl
         )
         await self.handler({"type": "__internal", "body": {"type": "setup_hook"}})
         await self.ws.start()
@@ -67,7 +89,16 @@ class Bot:
     def event(self, event=""):
         """A decorator that can listen for events in Discord.py-like notation.
 
-        Examples:
+        For a list of events, see [documentation](https://docs.misspy.xyz/rewrite/events).
+        
+        ## Examples:
+        ```python
+        @bot.event()
+        async def on_ready():
+            print("ready!")
+        ```
+
+        ↓ Put the event name in the decorator argument.
         ```python
         @bot.event("ready")
         async def ready():
@@ -79,12 +110,20 @@ class Bot:
         """
 
         def decorator(func):
-            func.__event_type = event
-            if self.funcs.get(event) and isinstance(self.funcs.get(event), list):
-                ev: list = self.funcs.get(event)
+            if event == "":
+                ev = func.__name__.replace("on_", "")
+            else:
+                ev = event
+            func.__event_type = ev
+            if isinstance(func, staticmethod):
+                func = func.__func__
+            if not inspect.iscoroutinefunction(func):
+                raise TypeError("Functions that listen for events must be coroutines.")
+            if self.funcs.get(ev) and isinstance(self.funcs.get(ev), list):
+                ev: list = self.funcs.get(ev)
                 ev.append(func)
             else:
-                self.funcs[event] = [func]
+                self.funcs[ev] = [func]
             return func
 
         return decorator
@@ -100,37 +139,45 @@ class Bot:
             )
     """
 
-    async def connect(self, channel, id=None):
-        await self.ws.connect_channel(channel, id)
+    async def connect(self, channel: Union[str, Timeline], id=None):
+        if isinstance(channel, Timeline):
+            await self.ws.connect_channel(channel.value, id)
+        else:
+            await self.ws.connect_channel(channel, id)
 
     async def handler(self, json: dict):
-        if json["type"] == "channel":
-            if json["body"]["type"] == "note":
-                if self.funcs.get("note") is None:
-                    return
-                json["body"]["body"]["api"] = {}
-                json["body"]["body"]["api"]["reactions"] = {}
-                json["body"]["body"]["api"]["reactions"]["create"] = partial(
-                    self.reactions.create, noteId=json["body"]["body"]["id"]
-                )
-                json["body"]["body"]["api"]["reactions"]["delete"] = partial(
-                    self.reactions.delete, noteId=json["body"]["body"]["id"]
-                )
-                json["body"]["body"]["api"]["reply"] = partial(
-                    self.notes.create, replyId=json["body"]["body"]["id"]
-                )
-                json["body"]["body"]["api"]["renote"] = partial(
-                    self.notes.create, renoteId=json["body"]["body"]["id"]
-                )
-                pnote = Context(**json["body"]["body"])
-                for func in self.funcs["note"]:
-                    await func(pnote)
-            if json["body"]["type"] == "followed":
-                if self.funcs.get("note") is None:
-                    return
-                for func in self.funcs["followed"]:
-                    await func()
-        elif json["type"] == "__internal":
+        try:
+            if json["type"] == "channel":
+                if json["body"]["type"] == "note":
+                    if self.funcs.get("note") is None:
+                        return
+                    json["body"]["body"]["api"] = {}
+                    json["body"]["body"]["api"]["reactions"] = {}
+                    json["body"]["body"]["api"]["reactions"]["create"] = partial(
+                        self.reactions.create, noteId=json["body"]["body"]["id"]
+                    )
+                    json["body"]["body"]["api"]["reactions"]["delete"] = partial(
+                        self.reactions.delete, noteId=json["body"]["body"]["id"]
+                    )
+                    json["body"]["body"]["api"]["reply"] = partial(
+                        self.notes.create, replyId=json["body"]["body"]["id"]
+                    )
+                    json["body"]["body"]["api"]["renote"] = partial(
+                        self.notes.create, renoteId=json["body"]["body"]["id"]
+                    )
+                    print(json["body"]["body"])
+                    pnote = Context(**json["body"]["body"])
+                    
+                    for func in self.funcs["note"]:
+                        await func(pnote)
+                if json["body"]["type"] == "followed":
+                    if self.funcs.get("note") is None:
+                        return
+                    for func in self.funcs["followed"]:
+                        await func()
+        except Exception as e:
+            await self.handler({"type": "__internal", "body": {"type": "exception", "errorType": e.__class__.__name__, "exc": traceback.format_exc(), "exc_obj": e}})
+        if json["type"] == "__internal":
             if json["body"]["type"] == "setup_hook":
                 if self.funcs.get("setup_hook") is None:
                     return
