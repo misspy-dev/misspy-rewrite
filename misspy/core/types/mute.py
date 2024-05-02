@@ -2,7 +2,7 @@ from typing import Union
 
 from pydantic import dataclasses
 
-from .note import Pin
+from .users import UserDetailedNotMe
 
 @dataclasses.dataclass()
 class mute:
@@ -10,4 +10,4 @@ class mute:
     createdAt: str
     expiresAt: Union[str, None]
     muteeId: str
-    mutee: Pin
+    mutee: UserDetailedNotMe
