@@ -1,6 +1,7 @@
 # misspy
 > [!WARNING]
 > This is in the development phase. Do not use in a production environment.
+<!--Streaming is not available because misspy-rewrite has a bug related to [#xxx](https://github.com/misskey-dev/misskey/issues/xxx). issuesは準備中-->
 
 Fast, asynchronous misskey API framework.
 
