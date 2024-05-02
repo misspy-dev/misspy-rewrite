@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List, Union
 import traceback
 
@@ -11,19 +12,25 @@ from mitypes.poll import Poll
 from mitypes.drive import DriveFile
 from ..utils.internaltool import nonecheck
 
+class Visibility(Enum):
+    PUBLIC = "public"
+    HOME = "home"
+    FOLLOWERS = "followers"
+    SPEFICED = "specified"
+
 class notes:
     def __init__(
         self, address: str, i: Union[str, None], ssl: bool, endpoints: List[str], handler: AsyncHttpHandler=None
     ) -> None:
-        self.http = handler
+        self.__http = handler
         if handler is None:
-            self.http = AsyncHttpHandler(address, i, ssl)
+            self.__http = AsyncHttpHandler(address, i, ssl)
         self.endpoints = endpoints
 
     async def create(
         self,
         text: Union[str, None] = None,
-        visibility: str = "public",
+        visibility: Union[str, Visibility] = "public",
         visibleUserIds: List[str] = [],
         cw: Union[str, None] = None,
         localOnly: bool = False,
@@ -73,6 +80,8 @@ class notes:
             "renoteId": renoteId,
             "channelId": channelId,
         }
+        if isinstance(visibility, Visibility):
+            data["visibility"] = visibility.value
         if fileIds:
             fid = []
             for file in fileIds:
@@ -80,10 +89,10 @@ class notes:
             data["fileIds"] = fid
         if poll:
             data["poll"] = poll
-        resp = await self.http.send(endpoint, data=data)
+        resp = await self.__http.send(endpoint, data=data)
         try:
             return Note(**resp["createdNote"])
-        except pydantic.ValidationError as e:
+        except pydantic.ValidationError:
             exc = traceback.format_exc()
             raise ValueError(exc + "\n\nError JSON: " + orjson.dumps(resp).decode('utf-8'))
 
@@ -100,7 +109,7 @@ class notes:
         if endpoint not in self.endpoints:
             raise NotFound(f'endpoint "{endpoint}" is not found.')
         data = {"noteId": noteId}
-        return await self.http.send(endpoint, data=data)
+        return await self.__http.send(endpoint, data=data)
 
     async def conversation(self, noteId: str, limit: int = 10, offset: int = 0):
         """Retrieve relevant notes.
@@ -116,10 +125,10 @@ class notes:
         endpoint = "notes/conversation"
         if endpoint not in self.endpoints:
             raise NotFound(f'endpoint "{endpoint}" is not found.')
-        return await self.http.send(
+        return [Note(**r) for r in await self.__http.send(
             endpoint,
             {"noteId": noteId, "limit": limit, "offset": offset},
-        )
+        )]    
     
     async def global_timeline(
         self,
@@ -152,12 +161,8 @@ class notes:
             base["sinceDate"] = sinceDate
         if nonecheck(untilDate):
             base["untilDate"] = untilDate
-        n = []
-        _notes = await self.http.send("notes/global-timeline", base)
-        for note in _notes:
-            n.append(Note(**note))
-        return n
-
+        _notes = await self.__http.send("notes/global-timeline", base)
+        return [Note(**r) for r in _notes]
 
     async def hybrid_timeline(
         self,
@@ -202,11 +207,8 @@ class notes:
             base["sinceDate"] = sinceDate
         if nonecheck(untilDate):
             base["untilDate"] = untilDate
-        n = []
-        _notes = await self.http.send("notes/hybrid-timeline", base)
-        for note in _notes:
-            n.append(Note(**note))
-        return n
+        _notes = await self.__http.send("notes/hybrid-timeline", base)
+        return [Note(**r) for r in _notes]
 
 
     async def home_timeline(
@@ -252,11 +254,8 @@ class notes:
             base["sinceDate"] = sinceDate
         if nonecheck(untilDate):
             base["untilDate"] = untilDate
-        n = []
-        _notes = await self.http.send("notes/timeline", base)
-        for note in _notes:
-            n.append(Note(**note))
-        return n
+        _notes = await self.__http.send("notes/timeline", base)
+        return [Note(**r) for r in _notes]
 
     async def local_timeline(
         self,
@@ -298,11 +297,8 @@ class notes:
             base["sinceDate"] = sinceDate
         if nonecheck(untilDate):
             base["untilDate"] = untilDate
-        n = []
-        _notes = await self.http.send("notes/local-timeline", base)
-        for note in _notes:
-            n.append(Note(**note))
-        return n
+        _notes = await self.__http.send("notes/local-timeline", base)
+        return [Note(**r) for r in _notes]
 
 
     async def featured(self, limit=10, offset=0):
@@ -315,11 +311,8 @@ class notes:
         Returns:
             List (Dict): _description_
         """
-        n = []
-        _notes = await self.http.send("notes/featured", {"limit": limit, "offset": offset})
-        for note in _notes:
-            n.append(Note(**note))
-        return n
+        _notes = await self.__http.send("notes/featured", {"limit": limit, "offset": offset})
+        return [Note(**r) for r in _notes]
 
     async def favorites_create(self, noteId):
         """create favorites.
@@ -330,7 +323,7 @@ class notes:
         Returns:
             Dict: _description_
         """
-        return await self.http.send("notes/favorites/create", {"noteId": noteId})
+        return await self.__http.send("notes/favorites/create", {"noteId": noteId})
 
 
     async def favorites_delete(self, noteId):
@@ -342,7 +335,7 @@ class notes:
         Returns:
             Dict: _description_
         """
-        return await self.http.send("notes/favorites/delete", {"noteId": noteId})
+        return await self.__http.send("notes/favorites/delete", {"noteId": noteId})
 
 
     async def polls_recommendation(self, limit=10, offset=0):
@@ -355,8 +348,7 @@ class notes:
         Returns:
             _type_: _description_
         """
-        return await self.http.send("notes/polls/recommendation", {"limit": limit, "offset": offset}
-        )
+        return await self.__http.send("notes/polls/recommendation", {"limit": limit, "offset": offset})
 
 
     async def polls_vote(self, noteId, choice):
@@ -369,7 +361,7 @@ class notes:
         Returns:
             _type_: _description_
         """
-        return await self.http.send("notes/polls/vote", {"noteId": noteId, "choice": choice})
+        return await self.__http.send("notes/polls/vote", {"noteId": noteId, "choice": choice})
 
 
     async def reactions(
@@ -386,7 +378,7 @@ class notes:
             base["sinceId"] = sinceId
         if nonecheck(untilId):
             base["untilId"] = untilId
-        return await self.http.send("notes/reactions", base)
+        return await self.__http.send("notes/reactions", base)
 
 
     async def replies(
@@ -397,7 +389,7 @@ class notes:
             base["sinceId"] = sinceId
         if nonecheck(untilId):
             base["untilId"] = untilId
-        return await self.http.send("notes/replies", base)
+        return await self.__http.send("notes/replies", base)
 
 
     async def search(
@@ -421,7 +413,7 @@ class notes:
             base["sinceId"] = sinceId
         if nonecheck(untilId):
             base["untilId"] = untilId
-        return await self.http.send("notes/search-by-tag", base)
+        return await self.__http.send("notes/search-by-tag", base)
 
 
     async def search_by_tag(
@@ -447,32 +439,32 @@ class notes:
             base["sinceId"] = sinceId
         if nonecheck(untilId):
             base["untilId"] = untilId
-        return await self.http.send("notes/search", base)
+        return await self.__http.send("notes/search", base)
 
 
     async def state(self, noteId):
-        return await self.http.send("notes/state", {"noteId": noteId})
+        return await self.__http.send("notes/state", {"noteId": noteId})
 
 
     async def show(self, noteId):
-        return await self.http.send("notes/show", {"noteId": noteId})
+        return await self.__http.send("notes/show", {"noteId": noteId})
 
 
     async def thread_muting_create(self, noteId):
-        return await self.http.send("notes/thread-muting/create", {"noteId": noteId})
+        return await self.__http.send("notes/thread-muting/create", {"noteId": noteId})
 
 
     async def thread_muting_delete(self, noteId):
-        return await self.http.send("notes/thread-muting/delete", {"noteId": noteId})
+        return await self.__http.send("notes/thread-muting/delete", {"noteId": noteId})
 
 
     async def translate(self, noteId, targetLang):
-        return await self.http.send("notes/translate", {"noteId": noteId, "targetLang": targetLang}
+        return await self.__http.send("notes/translate", {"noteId": noteId, "targetLang": targetLang}
         )
 
 
     async def unrenote(self, noteId):
-        return await self.http.send("notes/unrenote", {"noteId": noteId})
+        return await self.__http.send("notes/unrenote", {"noteId": noteId})
 
 
     async def user_list_timeline(
@@ -503,17 +495,17 @@ class notes:
         if nonecheck(untilId):
             base["untilId"] = untilId
         n = []
-        _notes = await self.http.send("notes/user-list-timeline", base)
+        _notes = await self.__http.send("notes/user-list-timeline", base)
         for note in _notes:
             n.append(Note(**note))
         return n
 
     async def watching_create(self, noteId):
-        return await self.http.send("notes/watching/create", {"noteId": noteId})
+        return await self.__http.send("notes/watching/create", {"noteId": noteId})
 
 
     async def watching_delete(self, noteId):
-        return await self.http.send("notes/watching/delete", {"noteId": noteId})
+        return await self.__http.send("notes/watching/delete", {"noteId": noteId})
 
 
     async def mentions(
@@ -526,4 +518,4 @@ class notes:
             base["untilId"] = untilId
         if nonecheck(visibility):
             base["visibility"] = visibility
-        return await self.http.send("notes/mentions", base)
+        return await self.__http.send("notes/mentions", base)
