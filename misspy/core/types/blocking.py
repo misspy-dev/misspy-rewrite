@@ -1,6 +1,6 @@
 from pydantic import dataclasses
 
-from .note import Pin
+from .users import UserDetailedNotMe
 
 
 @dataclasses.dataclass()
@@ -8,4 +8,4 @@ class blocking_list:
     id: str
     createdAt: str
     blockeeId: str
-    blockee: Pin
+    blockee: UserDetailedNotMe
