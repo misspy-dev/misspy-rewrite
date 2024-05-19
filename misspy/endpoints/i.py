@@ -4,17 +4,17 @@ from mitypes import User, UserLite
 from mitypes.drive import DriveFile
 
 from ..core.http import AsyncHttpHandler, HttpHandler
-from ..core.types.antennas import created_antnna, notes, show_antnna
-from ..core.types.blocking import blocking_list
-from ..core.types.clip import clips
-from ..core.types.favorites import favorite
-from ..core.types.following import RequestList
-from ..core.types.likes import GalleryPost, Like
-from ..core.types.mute import mute as mp_mute
-from ..core.types.note import Note#, Pin
-from ..core.types.notifications import notifications as notify
-from ..core.types.page import Page, likes
-from ..core.types.users import (
+from ..core.models.antennas import created_antnna, notes, show_antnna
+from ..core.models.blocking import blocking_list
+from ..core.models.clip import clips
+from ..core.models.favorites import favorite
+from ..core.models.following import RequestList
+from ..core.models.likes import GalleryPost, Like
+from ..core.models.mute import mute as mp_mute
+from ..core.models.note import Note  # , Pin
+from ..core.models.notifications import notifications as notify
+from ..core.models.page import Page, likes
+from ..core.models.users import (
     Follow,
     Frequently_replied,
     MeDetailed,
@@ -130,6 +130,7 @@ class i:
         for page_like in resp:
             lks.append(likes(**page_like))
         return lks
+
     """
     async def pin(self, noteId):
         return Pin(**await self.__http.send("i/pin", {"noteId": noteId}))
@@ -140,6 +141,7 @@ class i:
     async def update(self, params):
         return Pin(**await self.__http.send("i/update", params))
     """
+
     async def read_all_unread_notes(self):
         return await self.__http.send("i/read-all-unread-notes", {})
 
@@ -315,7 +317,14 @@ class mute:
 
 
 class users:
-    def __init__(self, address: str, i: Union[str, None], ssl: bool, endpoints: List[str], handler: AsyncHttpHandler=None) -> None:
+    def __init__(
+        self,
+        address: str,
+        i: Union[str, None],
+        ssl: bool,
+        endpoints: List[str],
+        handler: AsyncHttpHandler = None,
+    ) -> None:
         self.i = i
         self.address = address
         self.__http = handler

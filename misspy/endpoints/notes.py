@@ -1,16 +1,17 @@
+import traceback
 from enum import Enum
 from typing import List, Union
-import traceback
 
-import pydantic
 import orjson
+import pydantic
+from mitypes.drive import DriveFile
+from mitypes.poll import Poll
 
 from ..core.exception import NotFound
 from ..core.http import AsyncHttpHandler
-from ..core.types.note import Note
-from mitypes.poll import Poll
-from mitypes.drive import DriveFile
+from ..core.models.note import Note
 from ..utils.internaltool import nonecheck
+
 
 class Visibility(Enum):
     PUBLIC = "public"
@@ -18,9 +19,15 @@ class Visibility(Enum):
     FOLLOWERS = "followers"
     SPEFICED = "specified"
 
+
 class notes:
     def __init__(
-        self, address: str, i: Union[str, None], ssl: bool, endpoints: List[str], handler: AsyncHttpHandler=None
+        self,
+        address: str,
+        i: Union[str, None],
+        ssl: bool,
+        endpoints: List[str],
+        handler: AsyncHttpHandler = None,
     ) -> None:
         self.__http = handler
         if handler is None:
@@ -94,7 +101,9 @@ class notes:
             return Note(**resp["createdNote"])
         except pydantic.ValidationError:
             exc = traceback.format_exc()
-            raise ValueError(exc + "\n\nError JSON: " + orjson.dumps(resp).decode('utf-8'))
+            raise ValueError(
+                exc + "\n\nError JSON: " + orjson.dumps(resp).decode("utf-8")
+            )
 
     async def delete(self, noteId: str) -> bool:
         """delete post.
@@ -125,11 +134,14 @@ class notes:
         endpoint = "notes/conversation"
         if endpoint not in self.endpoints:
             raise NotFound(f'endpoint "{endpoint}" is not found.')
-        return [Note(**r) for r in await self.__http.send(
-            endpoint,
-            {"noteId": noteId, "limit": limit, "offset": offset},
-        )]    
-    
+        return [
+            Note(**r)
+            for r in await self.__http.send(
+                endpoint,
+                {"noteId": noteId, "limit": limit, "offset": offset},
+            )
+        ]
+
     async def global_timeline(
         self,
         withFiles=False,
@@ -210,7 +222,6 @@ class notes:
         _notes = await self.__http.send("notes/hybrid-timeline", base)
         return [Note(**r) for r in _notes]
 
-
     async def home_timeline(
         self,
         limit=10,
@@ -269,7 +280,7 @@ class notes:
         untilDate=None,
     ):
         """Get the Local Timeline (LTL). The local timeline contains all public notes in the server.
-        
+
         Args:
             withFiles (bool, optional): If set to true, only notes with files attached will be retrieved.
             fileType (bool, optional): Retrieve only those posts with files of the specified type attached.
@@ -300,7 +311,6 @@ class notes:
         _notes = await self.__http.send("notes/local-timeline", base)
         return [Note(**r) for r in _notes]
 
-
     async def featured(self, limit=10, offset=0):
         """Retrieves highlighted notes. Results are sorted in descending order of note creation time (latest first).
 
@@ -311,7 +321,9 @@ class notes:
         Returns:
             List (Dict): _description_
         """
-        _notes = await self.__http.send("notes/featured", {"limit": limit, "offset": offset})
+        _notes = await self.__http.send(
+            "notes/featured", {"limit": limit, "offset": offset}
+        )
         return [Note(**r) for r in _notes]
 
     async def favorites_create(self, noteId):
@@ -325,7 +337,6 @@ class notes:
         """
         return await self.__http.send("notes/favorites/create", {"noteId": noteId})
 
-
     async def favorites_delete(self, noteId):
         """delete favorites
 
@@ -337,7 +348,6 @@ class notes:
         """
         return await self.__http.send("notes/favorites/delete", {"noteId": noteId})
 
-
     async def polls_recommendation(self, limit=10, offset=0):
         """Get a list of recommended notes with a survey.
 
@@ -348,8 +358,9 @@ class notes:
         Returns:
             _type_: _description_
         """
-        return await self.__http.send("notes/polls/recommendation", {"limit": limit, "offset": offset})
-
+        return await self.__http.send(
+            "notes/polls/recommendation", {"limit": limit, "offset": offset}
+        )
 
     async def polls_vote(self, noteId, choice):
         """Vote in the notebook poll. To vote for multiple choices, change the choice and make multiple requests.
@@ -361,8 +372,9 @@ class notes:
         Returns:
             _type_: _description_
         """
-        return await self.__http.send("notes/polls/vote", {"noteId": noteId, "choice": choice})
-
+        return await self.__http.send(
+            "notes/polls/vote", {"noteId": noteId, "choice": choice}
+        )
 
     async def reactions(
         self,
@@ -380,7 +392,6 @@ class notes:
             base["untilId"] = untilId
         return await self.__http.send("notes/reactions", base)
 
-
     async def replies(
         self, noteId: str, sinceId: str = None, untilId: str = None, limit: int = 10
     ):
@@ -390,7 +401,6 @@ class notes:
         if nonecheck(untilId):
             base["untilId"] = untilId
         return await self.__http.send("notes/replies", base)
-
 
     async def search(
         self,
@@ -414,7 +424,6 @@ class notes:
         if nonecheck(untilId):
             base["untilId"] = untilId
         return await self.__http.send("notes/search-by-tag", base)
-
 
     async def search_by_tag(
         self,
@@ -441,31 +450,25 @@ class notes:
             base["untilId"] = untilId
         return await self.__http.send("notes/search", base)
 
-
     async def state(self, noteId):
         return await self.__http.send("notes/state", {"noteId": noteId})
-
 
     async def show(self, noteId):
         return await self.__http.send("notes/show", {"noteId": noteId})
 
-
     async def thread_muting_create(self, noteId):
         return await self.__http.send("notes/thread-muting/create", {"noteId": noteId})
-
 
     async def thread_muting_delete(self, noteId):
         return await self.__http.send("notes/thread-muting/delete", {"noteId": noteId})
 
-
     async def translate(self, noteId, targetLang):
-        return await self.__http.send("notes/translate", {"noteId": noteId, "targetLang": targetLang}
+        return await self.__http.send(
+            "notes/translate", {"noteId": noteId, "targetLang": targetLang}
         )
-
 
     async def unrenote(self, noteId):
         return await self.__http.send("notes/unrenote", {"noteId": noteId})
-
 
     async def user_list_timeline(
         self,
@@ -503,10 +506,8 @@ class notes:
     async def watching_create(self, noteId):
         return await self.__http.send("notes/watching/create", {"noteId": noteId})
 
-
     async def watching_delete(self, noteId):
         return await self.__http.send("notes/watching/delete", {"noteId": noteId})
-
 
     async def mentions(
         self, following=False, limit=10, sinceId=None, untilId=None, visibility=None
