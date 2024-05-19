@@ -1,12 +1,13 @@
 import urllib.parse
-from typing import Union, List
 import uuid
+from typing import List, Union
 
 import aiohttp
 from mitypes import User
 
-from ...core.types.internal import miauth_session
 from ...core.exception import MiAuthFailed, NotFound
+from ...core.models.internal import miauth_session
+
 
 class session:
     def __init__(self) -> None:
@@ -31,19 +32,34 @@ class session:
             params["callback"] = callback
         if permission:
             params["permission"] = ",".join(permission)
-        generated_session = miauth_session(sessionId, host, urllib.parse.urlunparse(url._replace(query=urllib.parse.urlencode(params, doseq=True))), name, icon, callback, permission)
+        generated_session = miauth_session(
+            sessionId,
+            host,
+            urllib.parse.urlunparse(
+                url._replace(query=urllib.parse.urlencode(params, doseq=True))
+            ),
+            name,
+            icon,
+            callback,
+            permission,
+        )
         return generated_session
 
-    async def check(
-        self,
-        authSession: miauth_session
-    ):
+    async def check(self, authSession: miauth_session):
         async with aiohttp.ClientSession() as session:
-            async with session.post("https://{}/api/miauth/{}/check".format(authSession.host, authSession.sessionId)) as resp:
+            async with session.post(
+                "https://{}/api/miauth/{}/check".format(
+                    authSession.host, authSession.sessionId
+                )
+            ) as resp:
                 try:
                     resp = await resp.json()
                 except aiohttp.ContentTypeError:
-                    raise NotFound('API endpoint "miauth/{}/check" does not exist. The version of Misskey you are using may be older than 12.27.0.'.format(authSession.sessionId))
+                    raise NotFound(
+                        'API endpoint "miauth/{}/check" does not exist. The version of Misskey you are using may be older than 12.27.0.'.format(
+                            authSession.sessionId
+                        )
+                    )
                 resp_i: dict = resp["user"]
                 resp_i["token"] = resp["token"]
                 if resp.get("token") is not None:
