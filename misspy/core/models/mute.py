@@ -1,8 +1,8 @@
 from typing import Union
 
+from .users import UserDetailedNotMe
 from pydantic import dataclasses
 
-from .users import UserDetailedNotMe
 
 @dataclasses.dataclass()
 class mute:

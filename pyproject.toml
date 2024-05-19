@@ -41,6 +41,7 @@ orjson = [
     { version = "^3.9.15", optional = true, platform = 'linux'},
     { version = "^3.9.15", optional = true, platform = 'darwin'}
 ]
+python-dateutil = "^2.9.0.post0"
 
 [tool.poetry.extras]
 speed = ["brotlicffi", "Brotli", "charset-normalizer", "aiodns", "orjson"]

@@ -1,17 +1,13 @@
-from typing import List, Union
+from typing import Union
 
 from pydantic import dataclasses
-from mitypes.user import AvatarDecorations
-from mitypes import Note
 
-from .page import Page
-from .role import RoleLite
-
-@dataclasses.dataclass(config=dict(extra="allow"))
+@dataclasses.dataclass
 class Emojis:
     ""
 
-@dataclasses.dataclass(config=dict(extra="allow"))
+
+@dataclasses.dataclass
 class Instance:
     name: Union[str, None]
     softwareName: Union[str, None]
@@ -20,17 +16,20 @@ class Instance:
     faviconUrl: Union[str, None]
     themeColor: Union[str, None]
 
-@dataclasses.dataclass()
+
+@dataclasses.dataclass
 class BadgeRoles:
     name: str
     iconUrl: Union[str, None]
     displayOrder: int
     behavior: str
 
-@dataclasses.dataclass()
+
+@dataclasses.dataclass
 class field:
     name: str
     value: str
+
 
 """
 @dataclasses.dataclass()

@@ -1,19 +1,21 @@
-from typing import Union, List
+from typing import List, Union, Any
 
 from pydantic import dataclasses, BaseModel, ConfigDict
 
-class MyModel(BaseModel):
+class mpyModel(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 @dataclasses.dataclass(config=dict(extra="allow"))
 class mspy:
     tlId: str
 
+
 @dataclasses.dataclass(config=dict(extra="allow"))
-class error(MyModel):
+class error(mpyModel):
     type: str
     exc: str
-    exc_obj: Exception
+    exc_obj: Any
+
 
 @dataclasses.dataclass()
 class miauth_session:
@@ -24,6 +26,7 @@ class miauth_session:
     icon: Union[str, None] = None
     callback: Union[str, None] = None
     permission: Union[List[str], None] = None
+
 
 @dataclasses.dataclass()
 class auth_session:

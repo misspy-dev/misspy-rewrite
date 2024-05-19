@@ -1,7 +1,8 @@
-from typing import Union, List
+from typing import List, Union
 
+from mitypes import DriveFile, UserLite
 from pydantic import dataclasses
-from mitypes import UserLite, DriveFile
+
 
 @dataclasses.dataclass()
 class posts:

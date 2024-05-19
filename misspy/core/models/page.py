@@ -1,13 +1,16 @@
 from __future__ import annotations
-from typing import Union, List
 
-from pydantic import dataclasses
+from typing import List, Union
+
 from mitypes.drive import DriveFile
 from mitypes.user import UserLite
+from pydantic import dataclasses
+
 
 @dataclasses.dataclass()
 class PageBlock:
     pass
+
 
 @dataclasses.dataclass()
 class Properties:
@@ -15,6 +18,7 @@ class Properties:
     height: int
     orientation: int
     avgColor: str
+
 
 @dataclasses.dataclass()
 class Folder:
@@ -25,6 +29,7 @@ class Folder:
     foldersCount: int
     filesCount: int
     parent: Folder
+
 
 @dataclasses.dataclass()
 class eyeCatchingImage:
@@ -42,6 +47,7 @@ class eyeCatchingImage:
     comment: Union[str, None]
     folderId: Union[str, None]
     folder: Folder
+
 
 @dataclasses.dataclass()
 class Page:
@@ -64,6 +70,7 @@ class Page:
     attachedFiles: List[DriveFile]
     likedCount: int
     isLiked: bool
+
 
 @dataclasses.dataclass()
 class likes:

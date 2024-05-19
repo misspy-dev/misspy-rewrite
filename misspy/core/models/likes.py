@@ -1,8 +1,9 @@
 from typing import Union
 
-from pydantic import dataclasses
-from mitypes.user import UserLite
 from mitypes.drive import DriveFile
+from mitypes.user import UserLite
+from pydantic import dataclasses
+
 
 @dataclasses.dataclass()
 class GalleryPost:
@@ -19,6 +20,7 @@ class GalleryPost:
     isSensitive: bool
     likedCount: int
     isLikes: bool
+
 
 @dataclasses.dataclass()
 class Like:

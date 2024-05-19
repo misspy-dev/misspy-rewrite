@@ -1,13 +1,15 @@
 from __future__ import annotations
-from typing import List, Union, Any
 
-from pydantic import dataclasses
+from typing import Any, List, Union
+
 from mitypes import UserLite
-from mitypes.poll import Poll
 from mitypes.drive import DriveFile
+from mitypes.poll import Poll
+from pydantic import dataclasses
 
-from .federation import Emojis
 from .channel import Channel
+from .federation import Emojis
+
 
 @dataclasses.dataclass()
 class notes:
@@ -47,6 +49,7 @@ class notes:
     clippedCount: int
     myReaction: Union[str, None]
 
+
 @dataclasses.dataclass()
 class created_antnna:
     id: str
@@ -65,6 +68,7 @@ class created_antnna:
     excludeBots: bool = False
     withReplies: bool = False
     hasUnreadNote: bool = False
+
 
 @dataclasses.dataclass()
 class show_antnna:

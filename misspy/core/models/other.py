@@ -2,8 +2,7 @@ from typing import List, Union
 
 from pydantic import dataclasses
 
-
-@dataclasses.dataclass(config=dict(extra="allow"))
+@dataclasses.dataclass()
 class App:
     id: str
     name: str

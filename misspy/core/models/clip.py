@@ -1,7 +1,8 @@
 from typing import Union
 
-from pydantic import dataclasses
 from mitypes import UserLite
+from pydantic import dataclasses
+
 
 @dataclasses.dataclass()
 class clips:

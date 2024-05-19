@@ -1,8 +1,6 @@
-
-from typing import Union, List, Any
+from mitypes import UserLite
 
 from pydantic import dataclasses
-from mitypes import UserLite
 
 @dataclasses.dataclass()
 class RequestList:

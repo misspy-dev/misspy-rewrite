@@ -1,4 +1,5 @@
 # misspy
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 > [!WARNING]
 > It is in the development phase and very many features are missing. Do not use in a production environment.
 <!--Streaming is not available because misspy-rewrite has a bug related to [#xxx](https://github.com/misskey-dev/misskey/issues/xxx). issuesは準備中-->

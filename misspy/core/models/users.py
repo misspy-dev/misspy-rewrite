@@ -1,15 +1,15 @@
+from typing import Any, List, Union
 
-from typing import Union, List, Any
-
-from pydantic import dataclasses
 from mitypes import UserLite
 from mitypes.user import AvatarDecorations
+from pydantic import dataclasses
 
-from .federation import Instance, Emojis, BadgeRoles, field
+from .federation import BadgeRoles, Emojis, Instance, field
+from .note import Note
+from .other import Achievements, Announcement, RolePolicies, SecurityKeysList
 from .page import Page
 from .role import RoleLite
-from .note import Note
-from .other import Announcement, Achievements, RolePolicies, SecurityKeysList
+
 
 @dataclasses.dataclass()
 class DriveUsage:
@@ -18,6 +18,7 @@ class DriveUsage:
     megabyte: int
     gigabyte: int
     terabyte: int
+
 
 @dataclasses.dataclass()
 class UserStat:
@@ -42,6 +43,7 @@ class UserStat:
     driveFilesCount: int
     driveUsage: DriveUsage
 
+
 @dataclasses.dataclass()
 class Relation:
     id: str
@@ -53,6 +55,7 @@ class Relation:
     isBlocked: bool
     isMuted: bool
     isRenoteMuted: bool
+
 
 @dataclasses.dataclass()
 class MeDetailed:
@@ -150,6 +153,7 @@ class MeDetailed:
     usePasswordLessLogin: bool = False
     securityKeys: bool = False
 
+
 @dataclasses.dataclass()
 class UserDetailedNotMe:
     id: str
@@ -211,6 +215,7 @@ class UserDetailedNotMe:
     usePasswordLessLogin: bool = False
     securityKeys: bool = False
 
+
 @dataclasses.dataclass()
 class followers:
     id: str
@@ -220,6 +225,7 @@ class followers:
     followee: UserDetailedNotMe
     follower: UserDetailedNotMe
 
+
 @dataclasses.dataclass()
 class reactions:
     id: str
@@ -227,10 +233,12 @@ class reactions:
     user: UserLite
     type: str
 
+
 @dataclasses.dataclass()
 class Frequently_replied:
     user: Union[UserDetailedNotMe, MeDetailed]
     weight: int
+
 
 @dataclasses.dataclass()
 class Follow:
