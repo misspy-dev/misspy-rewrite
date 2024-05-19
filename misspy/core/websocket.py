@@ -33,9 +33,12 @@ class MiWS_V2:
         self.urlfmt = "://"
         if ssl:
             self.urlfmt = "s://"
+        self.ConnectionClosedError = websockets.ConnectionClosedError
+
+    async def close(self):
+        await self.ws.close()
 
     async def start(self):
-        print("maked url: " + 'ws{}{}/streaming?i={}'.format(self.urlfmt, self.address, self.i))
         async with websockets.connect('ws{}{}/streaming?i={}'.format(self.urlfmt, self.address, self.i)) as self.ws:
             await self.handler({"type": "__internal", "body": {"type": "ready"}})
             recv = orjson.loads(await self.ws.recv())
