@@ -1,16 +1,15 @@
 from importlib.metadata import version
 
-from mitypes.drive import DriveFolder, df_property, DriveFile
-from mitypes.user import AvatarDecorations, User, UserLite
+from mitypes.drive import DriveFile, DriveFolder, df_property
 from mitypes.poll import Poll
+from mitypes.user import AvatarDecorations, User, UserLite
 
 from .Bot import Bot, Timeline
 from .Cog import Cog
-
 from .core import websocket
 from .core.experimental import aiows
-from .core.types import *  # noqa: F403
-from .core.types.note import Note, Context
+from .core.models import *  # noqa: F403
+from .core.models.note import Context, Note
 
 __version__ = version("misspy")
 
