@@ -1,9 +1,9 @@
 import asyncio
 import inspect
 import logging
+import traceback
 from enum import Enum
 from functools import partial
-import traceback
 
 # from importlib import import_module
 from typing import Union
@@ -13,13 +13,15 @@ from mitypes.user import User
 from .core.exception import (
     ClientException,
     MisskeyAPIError,
-#     NotExtensionError
 )
+
+#     NotExtensionError
 from .core.http import AsyncHttpHandler, HttpHandler
+from .core.models.internal import error
+from .core.models.note import Context
 from .core.websocket import MiWS_V2
 
-from .core.types.internal import error
-from .core.types.note import Context
+# from .core.models.note import Context
 from .endpoints.drive import drive
 from .endpoints.i import antennas, blocking, following, mute, users
 from .endpoints.i import i as ep_i
@@ -28,7 +30,7 @@ from .endpoints.reaction import reactions
 
 
 class Timeline(Enum):
-    HOMR = "homeTimeline"
+    HOME = "homeTimeline"
     LOCAL = "localTimeline"
     SOCIAL = "hybridTimeline"
     HYBRID = "hybridTimeline"
@@ -69,6 +71,7 @@ class Bot:
         self.users = users(**args)
         self.following = following(**args)
         # ---------------------------------
+        self.reconnectionCoolDown: int = 3
 
     def __i(self):
         return self.http_sync.send("i", data={})
@@ -80,17 +83,47 @@ class Bot:
         asyncio.run(self.start())
 
     async def start(self, reconnect=False):
-        self.ws = self.engine(
-            self.address, self._i, self.handler, reconnect, self.ssl
-        )
+        self.ws = self.engine(self.address, self._i, self.handler, reconnect, self.ssl)
         await self.handler({"type": "__internal", "body": {"type": "setup_hook"}})
-        await self.ws.start()
+        try:
+            await self.ws.start()
+        except Exception as e:
+            if isinstance(e, self.ws.ConnectionClosedError):
+                if reconnect:
+                    if isinstance(self.reconnectionCoolDown, int):
+                        await asyncio.sleep(self.reconnectionCoolDown)
+                    else:
+                        await asyncio.sleep(3)
+                    await self.start(reconnect)
+                else:
+                    await self.handler(
+                        {
+                            "type": "__internal",
+                            "body": {
+                                "type": "exception",
+                                "errorType": e.__class__.__name__,
+                                "exc": traceback.format_exc(),
+                                "exc_obj": e,
+                            },
+                        }
+                    )
+            await self.handler(
+                {
+                    "type": "__internal",
+                    "body": {
+                        "type": "exception",
+                        "errorType": e.__class__.__name__,
+                        "exc": traceback.format_exc(),
+                        "exc_obj": e,
+                    },
+                }
+            )
 
     def event(self, event=""):
         """A decorator that can listen for events in Discord.py-like notation.
 
         For a list of events, see [documentation](https://docs.misspy.xyz/rewrite/events).
-        
+
         ## Examples:
         ```python
         @bot.event()
@@ -111,7 +144,7 @@ class Bot:
 
         def decorator(func):
             if event == "":
-                ev = func.__name__.replace("on_", "")
+                ev = func.__name__
             else:
                 ev = event
             func.__event_type = ev
@@ -149,7 +182,7 @@ class Bot:
         try:
             if json["type"] == "channel":
                 if json["body"]["type"] == "note":
-                    if self.funcs.get("note") is None:
+                    if self.funcs.get("on_note") is None:
                         return
                     json["body"]["body"]["api"] = {}
                     json["body"]["body"]["api"]["reactions"] = {}
@@ -165,18 +198,27 @@ class Bot:
                     json["body"]["body"]["api"]["renote"] = partial(
                         self.notes.create, renoteId=json["body"]["body"]["id"]
                     )
-                    print(json["body"]["body"])
                     pnote = Context(**json["body"]["body"])
-                    
-                    for func in self.funcs["note"]:
+
+                    for func in self.funcs["on_note"]:
                         await func(pnote)
                 if json["body"]["type"] == "followed":
-                    if self.funcs.get("note") is None:
+                    if self.funcs.get("on_followed") is None:
                         return
-                    for func in self.funcs["followed"]:
+                    for func in self.funcs["on_followed"]:
                         await func()
         except Exception as e:
-            await self.handler({"type": "__internal", "body": {"type": "exception", "errorType": e.__class__.__name__, "exc": traceback.format_exc(), "exc_obj": e}})
+            await self.handler(
+                {
+                    "type": "__internal",
+                    "body": {
+                        "type": "exception",
+                        "errorType": e.__class__.__name__,
+                        "exc": traceback.format_exc(),
+                        "exc_obj": e,
+                    },
+                }
+            )
         if json["type"] == "__internal":
             if json["body"]["type"] == "setup_hook":
                 if self.funcs.get("setup_hook") is None:
@@ -184,18 +226,18 @@ class Bot:
                 for func in self.funcs["setup_hook"]:
                     await func()
             if json["body"]["type"] == "ready":
-                if self.funcs.get("ready") is None:
+                if self.funcs.get("on_ready") is None:
                     return
-                for func in self.funcs["ready"]:
+                for func in self.funcs["on_ready"]:
                     await func()
             elif json["body"]["type"] == "exception":
-                if self.funcs.get("error"):
+                if self.funcs.get("on_error"):
                     eb = {
                         "type": json["body"]["errorType"],
                         "exc": json["body"]["exc"],
                         "exc_obj": json["body"]["exc_obj"],
                     }
-                    for func in self.funcs["error"]:
+                    for func in self.funcs["on_error"]:
                         await func(error(**eb))
                 else:
                     if json["body"]["errorType"] in self.apierrors:
