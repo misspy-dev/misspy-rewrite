@@ -37,4 +37,4 @@ An example can be found in [example directory](/example).
 misspy currently supports all versions of Python 3.8 and later.
 
 ### Docs
-Documentation can be found at: [https://rewrite.misspy.xyz/docs](#) (Currently under preparation.)
+Documentation can be found at: [https://misspy.github.io/docs](#) (Currently under preparation.)
