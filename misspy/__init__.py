@@ -5,7 +5,7 @@ from mitypes.poll import Poll
 from mitypes.user import AvatarDecorations, User, UserLite
 
 from .Bot import Bot, Timeline
-from .Cog import Cog
+from .gear import Gear
 from .core import websocket
 from .core.experimental import aiows
 from .core.models import *  # noqa: F403
