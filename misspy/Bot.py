@@ -3,9 +3,9 @@ import inspect
 import logging
 import traceback
 from enum import Enum
-from functools import partial
+from functools import partial, reduce
 
-# from importlib import import_module
+from importlib import import_module
 from typing import Union
 
 from mitypes.user import User
@@ -20,6 +20,7 @@ from .core.http import AsyncHttpHandler, HttpHandler
 from .core.models.internal import error
 from .core.models.note import Context
 from .core.websocket import MiWS_V2
+from .core.experimental.aiows import MSC
 
 # from .core.models.note import Context
 from .endpoints.drive import drive
@@ -38,19 +39,19 @@ class Timeline(Enum):
 
 
 class Bot:
-    def __init__(self, address: str, i: Union[str, None]) -> None:
+    def __init__(self, address: str, i: Union[str, None], use_ws_aio: bool=False) -> None:
         self.apierrors = []
         self.logger = logging.getLogger("misspy")
         self.address = address
         self._i = i
-        self.engine = MiWS_V2
+        self.engine = MiWS_V2 if not use_ws_aio else MSC
         self.ssl = True
         self.http = AsyncHttpHandler(
             self.address, self._i, self.ssl, logger=self.logger
         )
         self.http_sync = HttpHandler(self.address, self._i, self.ssl)
         self.user: User = User(**self.__i())
-        self.funcs: dict = {}
+        self.__funcs: dict = {}
         self.cls = []
         self.endpoint_list = self.endpoints()
         args = {
@@ -73,14 +74,21 @@ class Bot:
         # ---------------------------------
         self.reconnectionCoolDown: int = 3
 
+        self.__connected_channels: list = []
+
     def __i(self):
         return self.http_sync.send("i", data={})
 
     def endpoints(self):
         return self.http_sync.send("endpoints", data={})
 
-    def run(self, reconnect=False):
+    def run(self, reconnect=False, log_handler: logging.Logger="INTERNAL"):
         asyncio.run(self.start())
+
+    async def __reconnecter(self):
+        for channel in self.__connected_channels:
+            await self.connect(channel["channel"], channel["id"])
+        self.__funcs["on_ready"].pop(0)
 
     async def start(self, reconnect=False):
         self.ws = self.engine(self.address, self._i, self.handler, reconnect, self.ssl)
@@ -94,7 +102,12 @@ class Bot:
                         await asyncio.sleep(self.reconnectionCoolDown)
                     else:
                         await asyncio.sleep(3)
+                    if self.__funcs.get("on_ready"):
+                        self.__funcs["on_ready"].insert(0, self.__reconnecter)
+                    else:
+                        self.__funcs["on_ready"] = [self.__reconnecter]
                     await self.start(reconnect)
+
                 else:
                     await self.handler(
                         {
@@ -118,6 +131,10 @@ class Bot:
                     },
                 }
             )
+
+    async def include_gear(self, package):
+        module = import_module(package).gear
+        self.__funcs = reduce(lambda d1, d2: {key: d1.get(key, []) + d2.get(key, []) for key in set(d1) | set(d2)}, [module._funcs, self.__funcs])
 
     def event(self, event=""):
         """A decorator that can listen for events in Discord.py-like notation.
@@ -152,11 +169,11 @@ class Bot:
                 func = func.__func__
             if not inspect.iscoroutinefunction(func):
                 raise TypeError("Functions that listen for events must be coroutines.")
-            if self.funcs.get(ev) and isinstance(self.funcs.get(ev), list):
-                ev: list = self.funcs.get(ev)
+            if self.__funcs.get(ev) and isinstance(self.__funcs.get(ev), list):
+                ev: list = self.__funcs.get(ev)
                 ev.append(func)
             else:
-                self.funcs[ev] = [func]
+                self.__funcs[ev] = [func]
             return func
 
         return decorator
@@ -174,15 +191,15 @@ class Bot:
 
     async def connect(self, channel: Union[str, Timeline], id=None):
         if isinstance(channel, Timeline):
-            await self.ws.connect_channel(channel.value, id)
-        else:
-            await self.ws.connect_channel(channel, id)
+            channel = channel.value
+        await self.ws.connect_channel(channel, id)
+        self.__connected_channels.append({"channel": channel, "id": id})
 
     async def handler(self, json: dict):
         try:
             if json["type"] == "channel":
                 if json["body"]["type"] == "note":
-                    if self.funcs.get("on_note") is None:
+                    if self.__funcs.get("on_note") is None:
                         return
                     json["body"]["body"]["api"] = {}
                     json["body"]["body"]["api"]["reactions"] = {}
@@ -200,12 +217,12 @@ class Bot:
                     )
                     pnote = Context(**json["body"]["body"])
 
-                    for func in self.funcs["on_note"]:
+                    for func in self.__funcs["on_note"]:
                         await func(pnote)
                 if json["body"]["type"] == "followed":
-                    if self.funcs.get("on_followed") is None:
+                    if self.__funcs.get("on_followed") is None:
                         return
-                    for func in self.funcs["on_followed"]:
+                    for func in self.__funcs["on_followed"]:
                         await func()
         except Exception as e:
             await self.handler(
@@ -221,23 +238,23 @@ class Bot:
             )
         if json["type"] == "__internal":
             if json["body"]["type"] == "setup_hook":
-                if self.funcs.get("setup_hook") is None:
+                if self.__funcs.get("setup_hook") is None:
                     return
-                for func in self.funcs["setup_hook"]:
+                for func in self.__funcs["setup_hook"]:
                     await func()
             if json["body"]["type"] == "ready":
-                if self.funcs.get("on_ready") is None:
+                if self.__funcs.get("on_ready") is None:
                     return
-                for func in self.funcs["on_ready"]:
+                for func in self.__funcs["on_ready"]:
                     await func()
             elif json["body"]["type"] == "exception":
-                if self.funcs.get("on_error"):
+                if self.__funcs.get("on_error"):
                     eb = {
                         "type": json["body"]["errorType"],
                         "exc": json["body"]["exc"],
                         "exc_obj": json["body"]["exc_obj"],
                     }
-                    for func in self.funcs["on_error"]:
+                    for func in self.__funcs["on_error"]:
                         await func(error(**eb))
                 else:
                     if json["body"]["errorType"] in self.apierrors:
