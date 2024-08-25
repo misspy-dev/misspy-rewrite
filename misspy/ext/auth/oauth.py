@@ -1,1 +1,1 @@
-# とりあえず未実装。OAuthは:neko_dakara_wakannyai2:
+# とりあえず未実装。OAuthは:kitsune_dakara_wakannyai2:
