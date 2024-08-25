@@ -1,6 +1,11 @@
-from typing import Union
+from typing import Union, List
 
 from pydantic import dataclasses
+from mitypes.user import AvatarDecorations
+
+from .note import Note
+from .page import Page
+from .role import RoleLite
 
 @dataclasses.dataclass
 class Emojis:
@@ -30,9 +35,7 @@ class field:
     name: str
     value: str
 
-
-"""
-@dataclasses.dataclass()
+@dataclasses.dataclass
 class users:
     id: str
     name: Union[str, None]
@@ -76,9 +79,6 @@ class users:
     publicReactions: bool
     followingVisibility: str
     followersVisibility: str
-    twoFactorEnabled: bool = False
-    usePasswordLessLogin: bool = False
-    securityKeys: bool = False
     roles: RoleLite
     memo: Union[str, None]
     moderationNote: str
@@ -92,4 +92,6 @@ class users:
     isRenoteMuted: bool
     notify: str
     withReplies: bool
-"""
+    twoFactorEnabled: bool = False
+    usePasswordLessLogin: bool = False
+    securityKeys: bool = False
